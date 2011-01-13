@@ -4,6 +4,7 @@ var config = require('./config');
 
 var NS_PUBSUB = 'http://jabber.org/protocol/pubsub';
 var NS_PUBSUB_EVENT = 'http://jabber.org/protocol/pubsub#event';
+var NS_PUBSUB_OWNER = 'http://jabber.org/protocol/pubsub#owner';
 
 var cl = new xmpp.Client(config.xmpp);
 
@@ -130,7 +131,18 @@ cl.on('online', function() {
 	} else
 	    usage("subscriptions <service>");
 	break;
+    case 'subscribers':
+	service = process.argv[3];
+	node = process.argv[4];
+	if (service && node) {
+	    oneShot(new xmpp.Element('iq', { type: 'get',
+					     to: service }).
+		    c('pubsub', { xmlns: NS_PUBSUB_OWNER }).
+		    c('subscriptions', { node: node }));
+	} else
+	    usage("subscribers <service>");
+	break;
     default:
-	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|...> ...");
+	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|...> ...");
     }
 });
