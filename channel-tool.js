@@ -98,7 +98,39 @@ cl.on('online', function() {
 	} else
 	    usage("retract-item <service> <node> <itemId>");
 	break;
+    case 'items':
+	service = process.argv[3];
+	node = process.argv[4];
+	if (service && node) {
+	    oneShot(new xmpp.Element('iq', { type: 'get',
+					     to: service }).
+		    c('pubsub', { xmlns: NS_PUBSUB }).
+		    c('items', { node: node }));
+	} else
+	    usage("items <service> <node>");
+	break;
+    case 'affiliations':
+	service = process.argv[3];
+	if (service) {
+	    oneShot(new xmpp.Element('iq', { type: 'get',
+					     to: service }).
+		    c('pubsub', { xmlns: NS_PUBSUB }).
+		    c('affiliations', {}));
+	    
+	} else
+	    usage("affiliations <service>");
+	break;
+    case 'subscriptions':
+	service = process.argv[3];
+	if (service) {
+	    oneShot(new xmpp.Element('iq', { type: 'get',
+					     to: service }).
+		    c('pubsub', { xmlns: NS_PUBSUB }).
+		    c('subscriptions', {}));
+	} else
+	    usage("subscriptions <service>");
+	break;
     default:
-	usage("<create-node|subscribe-node|publish-item|retract-item|...> ...");
+	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|...> ...");
     }
 });
