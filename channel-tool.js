@@ -140,7 +140,7 @@ cl.on('online', function() {
 		    c('pubsub', { xmlns: NS_PUBSUB_OWNER }).
 		    c('subscriptions', { node: node }));
 	} else
-	    usage("subscribers <service>");
+	    usage("subscribers <service> <node>");
 	break;
     default:
 	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|...> ...");
