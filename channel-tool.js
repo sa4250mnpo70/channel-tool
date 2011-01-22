@@ -5,6 +5,8 @@ var config = require('./config');
 var NS_PUBSUB = 'http://jabber.org/protocol/pubsub';
 var NS_PUBSUB_EVENT = 'http://jabber.org/protocol/pubsub#event';
 var NS_PUBSUB_OWNER = 'http://jabber.org/protocol/pubsub#owner';
+var NS_PUBSUB_NODE_CONFIG = 'http://jabber.org/protocol/pubsub#node_config';
+var NS_DATA = 'jabber:x:data';
 
 var cl = new xmpp.Client(config.xmpp);
 
@@ -17,6 +19,8 @@ function oneShot(el) {
 	if (reply.attrs.id === stanza.attrs.id) {
 	    console.info(reply.toString());
 	    process.exit(0);
+	} else {
+	    console.info('Unmatched: ' + reply.toString());
 	}
     });
 }
@@ -142,7 +146,44 @@ cl.on('online', function() {
 	} else
 	    usage("subscribers <service> <node>");
 	break;
+    case 'get-config':
+	service = process.argv[3];
+	node = process.argv[4];
+	if (service && node) {
+	    oneShot(new xmpp.Element('iq', { type: 'get',
+					     to: service }).
+		    c('pubsub', { xmlns: NS_PUBSUB_OWNER }).
+		    c('configure', { node: node }));
+	} else
+	    usage("get-config <service> <node>");
+	break;
+    case 'set-config':
+	service = process.argv[3];
+	node = process.argv[4];
+	if (service && node) {
+	    var xEl = new xmpp.Element('iq', { type: 'set',
+					       to: service }).
+		c('pubsub', { xmlns: NS_PUBSUB_OWNER }).
+		c('configure', { node: node }).
+		c('x', { xmlns: NS_DATA,
+			 type: 'submit' }).
+		c('field', { var: 'FORM_TYPE',
+			     type: 'hidden' }).
+		c('value').t(NS_PUBSUB_NODE_CONFIG).
+		up().up();
+	    var args = process.argv.slice(5);
+	    while(args.length >= 2) {
+		var field = args.shift();
+		var value = args.shift();
+		if (field && value)
+		    xEl.c('field', { var: field }).
+			    c('value').t(value);
+	    }
+	    oneShot(xEl);
+	} else
+	    usage("set-config <service> <node> <field1> <value1> [...]");
+	break;
     default:
-	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|...> ...");
+	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|...> ...");
     }
 });
