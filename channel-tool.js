@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var xmpp = require('node-xmpp');
 var ltx = require('ltx');
 var config = require('./config');
