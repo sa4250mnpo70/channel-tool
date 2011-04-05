@@ -8,6 +8,7 @@ var NS_PUBSUB_EVENT = 'http://jabber.org/protocol/pubsub#event';
 var NS_PUBSUB_OWNER = 'http://jabber.org/protocol/pubsub#owner';
 var NS_PUBSUB_NODE_CONFIG = 'http://jabber.org/protocol/pubsub#node_config';
 var NS_DATA = 'jabber:x:data';
+var NS_ARCHIVE_MANAGEMENT = 'urn:xmpp:archive#management';
 
 var cl = new xmpp.Client(config.xmpp);
 
@@ -20,8 +21,6 @@ function oneShot(el) {
 	if (reply.attrs.id === stanza.attrs.id) {
 	    console.info(reply.toString());
 	    process.exit(0);
-	} else {
-	    console.info('Unmatched: ' + reply.toString());
 	}
     });
 }
@@ -184,7 +183,27 @@ cl.on('online', function() {
 	} else
 	    usage("set-config <service> <node> <field1> <value1> [...]");
 	break;
+    case 'archive':
+	service = process.argv[3];
+	var timeStart = process.argv[4];
+	var timeEnd = process.argv[5];
+	if (service) {
+	    cl.on('stanza', function(stanza) {
+		if (stanza.name === 'message')
+		    console.log(stanza.toString());
+	    });
+
+	    var queryAttrs = { xmlns: NS_ARCHIVE_MANAGEMENT };
+	    if (timeStart)
+		queryAttrs.start = timeStart;
+	    if (timeEnd)
+		queryAttrs.end = timeEnd;
+	    oneShot(new xmpp.Element('iq', { type: 'get',
+					     to: service }).
+		    c('query', queryAttrs));
+	}
+	break;
     default:
-	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|...> ...");
+	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|archive|...> ...");
     }
 });
