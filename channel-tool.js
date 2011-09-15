@@ -3,6 +3,7 @@ var xmpp = require('node-xmpp');
 var ltx = require('ltx');
 var config = require('./config');
 
+var NS_REGISTER = 'jabber:iq:register';
 var NS_PUBSUB = 'http://jabber.org/protocol/pubsub';
 var NS_PUBSUB_EVENT = 'http://jabber.org/protocol/pubsub#event';
 var NS_PUBSUB_OWNER = 'http://jabber.org/protocol/pubsub#owner';
@@ -49,6 +50,15 @@ cl.on('online', function() {
     var service, node, itemId;
 
     switch(process.argv[2]) {
+    case 'register':
+	service = process.argv[3];
+	if (service) {
+	    oneShot(new xmpp.Element('iq', { type: 'set',
+					     to: service }).
+		    c('query', { xmlns: NS_REGISTER }));
+	} else
+	    usage("register <service>");
+	break;
     case 'create-node':
 	service = process.argv[3];
 	node = process.argv[4];
@@ -204,6 +214,6 @@ cl.on('online', function() {
 	}
 	break;
     default:
-	usage("<create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|archive|...> ...");
+	usage("<register|create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|archive|...> ...");
     }
 });
