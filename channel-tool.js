@@ -81,6 +81,17 @@ cl.on('online', function() {
 	} else
 	    usage("subscribe-node <service> <node>");
 	break;
+    case 'unsubscribe-node':
+	service = process.argv[3];
+	node = process.argv[4];
+	if (service && node) {
+	    oneShot(new xmpp.Element('iq', { type: 'set',
+					     to: service }).
+		    c('pubsub', { xmlns: NS_PUBSUB }).
+		    c('unsubscribe', { node: node }));
+	} else
+	    usage("unsubscribe-node <service> <node>");
+	break;
     case 'publish-item':
 	service = process.argv[3];
 	node = process.argv[4];
@@ -214,6 +225,6 @@ cl.on('online', function() {
 	}
 	break;
     default:
-	usage("<register|create-node|subscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|archive|...> ...");
+	usage("<register|create-node|subscribe-node|unsubscribe-node|publish-item|retract-item|items|affiliations|subscriptions|subscribers|get-config|set-config|archive|...> ...");
     }
 });
